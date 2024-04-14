@@ -1,30 +1,47 @@
 	--------> Master and Slave 	
-	Step-1 Install mysql both master and slave	sudo apt-get update
+	Step-1 Install mysql both master and slave	
+		sudo apt-get update
 		sudo apt-get install -y mysql-server
 		sudo mysql_secure_installation
-	Step-2. Edit /etc/mysql/mysqld.conf.d/mysqld.cnf	Bind_address = 0.0.0.0
-	 in both master and slave server 	
-	But Master server-id =1	server-id = 1 
-	And Slave server-id =2	log_bin = /var/log/mysql/mysql-bin.log 
+
+	Step-2. Edit /etc/mysql/mysqld.conf.d/mysqld.cnf	
+		server-id = 1 
+		log_bin = /var/log/mysql/mysql-bin.log 
 		log_bin_index =/var/log/mysql/mysql-bin.log.index 
 		relay_log = /var/log/mysql/mysql-relay-bin 
 		relay_log_index = /var/log/mysql/mysql-relay-bin.index
-	Step -3. only on master server --->Create user for Replication 	CREATE USER 'myreplica'@'slave-server-ip' IDENTIFIED WITH mysql_native_password BY 'Admin@123';
+	
+	Step -3. only on master server --->Create user for Replication 	
+		CREATE USER 'myreplica'@'slave-server-ip' IDENTIFIED WITH mysql_native_password BY 'Admin@123';
 		GRANT REPLICATION SLAVE ON *.* TO 'myreplica'@'slave-server-ip';
 		SHOW GRANTS FOR 'myreplica'@'slave-server-ip';
 		FLUSH PRIVILEGES;
-	Restart Mysql 	systemctl restart mysql 
+	
+	Restart Mysql 	
+		systemctl restart mysql 
 		systemctl status mysql 
 		
 	--------> Slave	
-	Step -1. Login mysql	Mysql -u root -p
-	Step-2. Go to master and check the position	show master status ; 
-	Step-3. Stop Slave	STOP SLAVE;
-	Change value 	MASTER_HOST : IP address of Master Server
+	Step -1. Login mysql	
+		Mysql -u root -p
+	
+	Step-2. Go to master and check the position	
+		show master status ; 
+	
+	Step-3. Stop Slave	
+		STOP SLAVE;
+	Change value 	
+		MASTER_HOST : IP address of Master Server
 		MASTER_USER :  Replication User of Master server that we had created in previous steps.
 		MASTER_PASSWORD : Replication User Password of Master server that we had created in previous steps. 
 		MASTER_LOG_FILE : Your Value of Master Log File of Master server
 		MASTER_LOG_POS : Your value of Master Log Position of Master server
-	Step -4. Before running change the ip with master server	CHANGE MASTER TO MASTER_HOST = '192.168.177.129', MASTER_USER = 'myreplica', MASTER_PASSWORD = 'Admin@123', MASTER_LOG_FILE = 'mysql-bin.000002', MASTER_LOG_POS = 157;
-	Step-5 Start Slave	START SLAVE;
-	Step-6. check connectivity	show slave status\G;
+	
+	Step -4. Before running change the ip with master server	
+		# Run on Slave server
+		CHANGE MASTER TO MASTER_HOST = '192.168.177.129', MASTER_USER = 'myreplica', MASTER_PASSWORD = 'Admin@123', MASTER_LOG_FILE = 'mysql-bin.000002', MASTER_LOG_POS = 157;
+	
+	Step-5 Start Slave	
+		START SLAVE;
+	Step-6. check connectivity	
+		show slave status\G;
